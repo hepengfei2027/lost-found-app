@@ -1,0 +1,14 @@
+# Java
+*.class
+*.jar
+*.war
+target/
+out/
+build/
+.idea/
+*.iml
+*.iws
+*.ipr
+.DS_Store
+application-*.properties
+*.log
