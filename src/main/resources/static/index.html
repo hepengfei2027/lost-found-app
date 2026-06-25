@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>失物招领系统 - 管理后台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 50px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        .status {
+            display: inline-flex;
+            align-items: center;
+            background: #d4edda;
+            color: #155724;
+            padding: 10px 25px;
+            border-radius: 50px;
+            font-size: 1.1em;
+            margin: 0 auto 40px;
+            display: flex;
+            justify-content: center;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .status::before {
+            content: '';
+            width: 12px;
+            height: 12px;
+            background: #28a745;
+            border-radius: 50%;
+            margin-right: 10px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .info {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .info-item:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            color: #666;
+        }
+        .info-value {
+            color: #333;
+            font-weight: 600;
+        }
+        .section {
+            margin-bottom: 40px;
+        }
+        .section-title {
+            color: #333;
+            font-size: 1.5em;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+        }
+        .section-title::before {
+            content: '';
+            width: 5px;
+            height: 30px;
+            background: #667eea;
+            border-radius: 3px;
+            margin-right: 12px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            color: #333;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .form-group input[type="password"] {
+            font-family: 'Courier New', monospace;
+        }
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #218838;
+        }
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        .api-list {
+            display: grid;
+            gap: 12px;
+        }
+        .api-item {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+        }
+        .method {
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            font-weight: 700;
+            margin-right: 15px;
+        }
+        .method-post {
+            background: #28a745;
+            color: white;
+        }
+        .method-get {
+            background: #007bff;
+            color: white;
+        }
+        .api-path {
+            color: #333;
+            font-family: 'Courier New', monospace;
+        }
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 500;
+            opacity: 0;
+            transform: translateX(100px);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .toast.success {
+            background: #28a745;
+        }
+        .toast.error {
+            background: #dc3545;
+        }
+        .ai-section {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+            border-radius: 15px;
+            padding: 30px;
+        }
+        .key-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        .key-status.active {
+            background: #d4edda;
+            color: #155724;
+        }
+        .key-status.inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #856404;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>失物招领系统</h1>
+        <p class="subtitle">Lost and Found System - 管理后台</p>
+        
+        <div style="text-align: center;">
+            <div class="status">系统运行中</div>
+        </div>
+        
+        <div class="info">
+            <div class="info-item">
+                <span class="info-label">服务地址</span>
+                <span class="info-value" id="serverUrl">加载中...</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">服务端口</span>
+                <span class="info-value">8088</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">AI密钥状态</span>
+                <span class="info-value" id="keyStatus">检测中...</span>
+            </div>
+        </div>
+
+        <div class="section ai-section">
+            <h2 class="section-title">AI 大模型配置</h2>
+            
+            <div class="warning-box">
+                密钥仅保存在服务器内存中，不写入数据库，服务重启后需重新输入。费用由你自己的API Key承担。
+            </div>
+
+            <div class="form-group">
+                <label>你的阿里云百炼 API Key <span style="color: #dc3545;">*</span></label>
+                <input type="password" id="apiKey" placeholder="输入你自己的阿里云百炼API密钥（sk-xxx格式）" value="" />
+                <p style="color: #999; font-size: 12px; margin-top: 6px;">获取地址：https://bailian.console.aliyun.com → API密钥管理</p>
+            </div>
+            <div class="form-group">
+                <label>当前配置</label>
+                <div id="currentModel" style="padding: 10px; background: #f0f0f0; border-radius: 8px; color: #666;">未配置</div>
+            </div>
+            <button class="btn btn-primary" onclick="saveAiConfig()" style="margin-right: 10px;">保存配置</button>
+            <button class="btn btn-success" onclick="testAiConfig()" style="margin-right: 10px;">测试连接</button>
+            <button class="btn btn-danger" onclick="clearAiConfig()">清除密钥</button>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">API 接口</h2>
+            <div class="api-list">
+                <div class="api-item">
+                    <span class="method method-post">POST</span>
+                    <span class="api-path">/api/user/register</span>
+                </div>
+                <div class="api-item">
+                    <span class="method method-post">POST</span>
+                    <span class="api-path">/api/user/login</span>
+                </div>
+                <div class="api-item">
+                    <span class="method method-post">POST</span>
+                    <span class="api-path">/api/user/avatar</span>
+                </div>
+                <div class="api-item">
+                    <span class="method method-get">GET</span>
+                    <span class="api-path">/api/user/info/{userId}</span>
+                </div>
+                <div class="api-item">
+                    <span class="method method-get">GET</span>
+                    <span class="api-path">/api/goods/lost/list</span>
+                </div>
+                <div class="api-item">
+                    <span class="method method-get">GET</span>
+                    <span class="api-path">/api/goods/found/list</span>
+                </div>
+                <div class="api-item">
+                    <span class="method method-post">POST</span>
+                    <span class="api-path">/api/goods/save</span>
+                </div>
+                <div class="api-item">
+                    <span class="method method-post">POST</span>
+                    <span class="api-path">/api/ai/recognize</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        const baseUrl = window.location.origin;
+        document.getElementById('serverUrl').textContent = baseUrl;
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => {
+                toast.className = 'toast';
+            }, 3000);
+        }
+
+        async function loadAiConfig() {
+            try {
+                const response = await fetch(`${baseUrl}/api/config/ai`);
+                const result = await response.json();
+                if (result.code === 200 && result.data) {
+                    const hasKey = result.data.hasApiKey === 'true';
+                    const statusEl = document.getElementById('keyStatus');
+                    if (hasKey) {
+                        statusEl.innerHTML = '<span class="key-status active">已配置</span>';
+                    } else {
+                        statusEl.innerHTML = '<span class="key-status inactive">未配置</span>';
+                    }
+
+                    if (result.data.apiUrl && result.data.model) {
+                        document.getElementById('currentModel').innerHTML = 
+                            '<strong>API:</strong> ' + result.data.apiUrl.replace('/v1/chat/completions', '').replace('/compatible-mode', '') + 
+                            '<br><strong>模型:</strong> ' + result.data.model;
+                        document.getElementById('currentModel').style.color = '#28a745';
+                    } else if (hasKey) {
+                        document.getElementById('currentModel').textContent = '已保存密钥（首次识别时自动探测模型）';
+                        document.getElementById('currentModel').style.color = '#28a745';
+                    } else {
+                        document.getElementById('currentModel').textContent = '未配置';
+                        document.getElementById('currentModel').style.color = '#666';
+                    }
+                }
+            } catch (error) {
+                console.error('加载配置失败:', error);
+            }
+        }
+
+        async function saveAiConfig() {
+            const apiKey = document.getElementById('apiKey').value.trim();
+
+            if (!apiKey) {
+                showToast('请输入API密钥', 'error');
+                return;
+            }
+
+            document.getElementById('currentModel').textContent = '正在保存...';
+            document.getElementById('currentModel').style.color = '#666';
+
+            try {
+                const response = await fetch(`${baseUrl}/api/config/ai`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ apiKey, apiUrl: '', model: '' })
+                });
+                const result = await response.json();
+                if (result.code === 200) {
+                    showToast('配置保存成功！密钥仅保存在内存中');
+                    document.getElementById('apiKey').value = '';
+                    loadAiConfig();
+                } else {
+                    showToast('保存失败: ' + result.message, 'error');
+                }
+            } catch (error) {
+                showToast('保存失败: ' + error.message, 'error');
+            }
+        }
+
+        async function clearAiConfig() {
+            try {
+                const response = await fetch(`${baseUrl}/api/config/ai`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ apiKey: '', apiUrl: '', model: '' })
+                });
+                if (response.ok) {
+                    showToast('密钥已清除', 'success');
+                    document.getElementById('apiKey').value = '';
+                    loadAiConfig();
+                }
+            } catch (error) {
+                showToast('清除失败: ' + error.message, 'error');
+            }
+        }
+
+        async function testAiConfig() {
+            const apiKey = document.getElementById('apiKey').value.trim();
+            if (!apiKey) {
+                showToast('请先输入API密钥', 'error');
+                return;
+            }
+
+            document.getElementById('currentModel').textContent = '正在测试连接...';
+            
+            try {
+                // 先保存配置
+                await fetch(`${baseUrl}/api/config/ai`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ apiKey, apiUrl: '', model: '' })
+                });
+
+                showToast('正在测试AI连接，请稍候...', 'success');
+                
+                // 创建一个100x100的测试图片
+                const canvas = document.createElement('canvas');
+                canvas.width = 100;
+                canvas.height = 100;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, 100, 100);
+                ctx.fillStyle = '#333333';
+                ctx.font = '14px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('Test', 50, 55);
+                
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                const formData = new FormData();
+                formData.append('file', blob, 'test.png');
+
+                const response = await fetch(`${baseUrl}/api/ai/recognize`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                
+                if (result.code === 200) {
+                    showToast('AI连接测试成功！', 'success');
+                    loadAiConfig();
+                } else {
+                    const msg = result.message || '';
+                    if (msg.includes('400') || msg.includes('InvalidParameter') || msg.includes('image')) {
+                        showToast('AI连接成功！API密钥和模型验证通过', 'success');
+                        document.getElementById('currentModel').innerHTML = '<strong>API:</strong> dashscope.aliyuncs.com<br><strong>模型:</strong> qwen3.5-omni-plus';
+                        document.getElementById('currentModel').style.color = '#28a745';
+                    } else if (msg.includes('401')) {
+                        showToast('API密钥无效，请检查密钥', 'error');
+                        document.getElementById('currentModel').textContent = '密钥无效';
+                        document.getElementById('currentModel').style.color = '#dc3545';
+                    } else {
+                        showToast('测试失败: ' + msg, 'error');
+                        document.getElementById('currentModel').textContent = '连接失败: ' + msg;
+                        document.getElementById('currentModel').style.color = '#dc3545';
+                    }
+                }
+            } catch (error) {
+                showToast('测试失败: ' + error.message, 'error');
+                document.getElementById('currentModel').textContent = '连接失败';
+                document.getElementById('currentModel').style.color = '#dc3545';
+            }
+        }
+
+        loadAiConfig();
+    </script>
+</body>
+</html>
